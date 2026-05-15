@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #030712;
+  --color-foreground: #f9fafb;
+
+  /* Custom spring easing — available as ease-spring in Tailwind */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Custom animations */
+  --animate-shimmer: shimmer 1.5s infinite linear;
+  --animate-in: animate-in 0.3s var(--ease-spring) both;
+  --animate-spin: spin 0.8s linear infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Utility class for shimmer skeleton */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    theme(colors.gray.800) 25%,
+    theme(colors.gray.700) 50%,
+    theme(colors.gray.800) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Tailwind v4 animate-in / fade-in / slide-in utilities */
+@layer utilities {
+  .animate-in {
+    animation-name: enter;
+    animation-fill-mode: both;
+  }
+
+  .fade-in {
+    --tw-enter-opacity: 0;
+  }
+
+  .slide-in-from-bottom-1 {
+    --tw-enter-translate-y: 4px;
+  }
+
+  .slide-in-from-bottom-2 {
+    --tw-enter-translate-y: 8px;
+  }
+
+  .slide-in-from-bottom-4 {
+    --tw-enter-translate-y: 16px;
+  }
+
+  .slide-in-from-bottom-6 {
+    --tw-enter-translate-y: 24px;
+  }
+
+  .fill-mode-both {
+    animation-fill-mode: both;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translateY(var(--tw-enter-translate-y, 0));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html,
+body {
+  background: #030712;
+  color: #f9fafb;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
