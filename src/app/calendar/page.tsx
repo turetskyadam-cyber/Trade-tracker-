@@ -1,28 +1,47 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CalendarView } from '@/components/calendar/CalendarView';
-import { getStoredAuth, clearAuth } from '@/lib/robinhood/auth';
+import { createClient } from '@/lib/supabase/client';
+import { useRobinhoodToken } from '@/hooks/useRobinhoodToken';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { NoSSR } from '@/components/ui/NoSSR';
 
-export default function CalendarPage() {
+function CalendarPageInner() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const { token, needsReconnect, fetchToken } = useRobinhoodToken();
 
   useEffect(() => {
-    const auth = getStoredAuth();
-    if (!auth) {
-      router.replace('/login');
-    } else {
-      setToken(auth.access_token);
-    }
-  }, [router]);
+    createClient().auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { router.replace('/login'); return; }
+      const t = await fetchToken();
+      if (!t) { router.replace('/connect'); return; }
+      setReady(true);
+    });
+  }, [router, fetchToken]);
 
-  const handleLogout = () => {
-    clearAuth();
+  useEffect(() => {
+    if (needsReconnect) router.replace('/connect');
+  }, [needsReconnect, router]);
+
+  const handleLogout = async () => {
+    await createClient().auth.signOut();
     router.replace('/login');
   };
 
-  if (!token) return null;
+  if (!ready || !token) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <LoadingSpinner size={32} />
+      </div>
+    );
+  }
 
   return <CalendarView token={token} onLogout={handleLogout} />;
+}
+
+export default function CalendarPage() {
+  return <NoSSR><CalendarPageInner /></NoSSR>;
 }
